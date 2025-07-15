@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LearnHub - Online Learning Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #6366f1;
+            --dark: #1e293b;
+            --light: #f8fafc;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            transition: all 0.3s ease;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .progress-bar-container {
+            height: 8px;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 4px;
+            background-color: var(--primary);
+            transition: width 0.5s ease;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/fe1d1e0c-ea40-49bf-b15f-38a16d174f1f.png" alt="LearnHub logo in navy blue with an open book icon and modern sans-serif typography" class="h-8 w-auto">
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="#" data-page="dashboard" class="page-link border-primary-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Dashboard</a>
+                        <a href="#" data-page="courses" class="page-link border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">My Courses</a>
+                        <a href="#" data-page="progress" class="page-link border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">My Progress</a>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                    <div class="relative ml-3">
+                        <div>
+                            <button type="button" class="bg-white rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+                                <span class="sr-only">Open user menu</span>
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/66c0d85e-462b-4e9f-88f3-58e7db03ac06.png" alt="User profile picture with neutral background and a silhouette of a person with medium-length hair" class="h-8 w-8 rounded-full">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="-mr-2 flex items-center sm:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500" id="mobile-menu-button">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile menu, show/hide based on menu state. -->
+        <div class="hidden sm:hidden" id="mobile-menu">
+            <div class="pt-2 pb-3 space-y-1">
+                <a href="#" data-page="dashboard" class="page-link bg-primary-50 border-primary-500 text-primary-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Dashboard</a>
+                <a href="#" data-page="courses" class="page-link border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">My Courses</a>
+                <a href="#" data-page="progress" class="page-link border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">My Progress</a>
+                <a href="#" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Settings</a>
+            </div>
+            <div class="pt-4 pb-3 border-t border-gray-200">
+                <div class="flex items-center px-4">
+                    <div class="flex-shrink-0">
+                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/973c9386-49de-437c-90f3-82bd0cc8994a.png" alt="Small user profile picture with neutral background showing the same person as desktop version but in a circular crop" class="h-10 w-10 rounded-full">
+                    </div>
+                    <div class="ml-3">
+                        <div class="text-base font-medium text-gray-800">Adarsh Singh</div>
+                        <div class="text-sm font-medium text-gray-500">adarshsingh@example.com</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Dashboard Page -->
+        <div id="dashboard-page" class="page active">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900">Welcome back, adarshsingh!</h1>
+                <p class="mt-2 text-gray-600">Continue learning where you left off</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Stats Cards -->
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-indigo-500 rounded-md p-3">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/c2daaaa5-58d5-439e-ac67-e346add6a69a.png" alt="Open book icon in white with blue background" class="h-6 w-6">
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Courses in progress</dt>
+                                    <dd>
+                                        <div class="text-lg font-medium text-gray-900">3</div>
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/5c84798b-bce2-497c-8a33-6f4647ba7650.png" alt="Checkmark icon in white with green background" class="h-6 w-6">
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Courses completed</dt>
+                                    <dd>
+                                        <div class="text-lg font-medium text-gray-900">5</div>
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/be3aba27-fdb6-4580-af51-0c8af19407ec.png" alt="Clock icon in white with amber background" class="h-6 w-6">
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Learning hours</dt>
+                                    <dd>
+                                        <div class="text-lg font-medium text-gray-900">24.5</div>
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-8">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">Continue learning</h2>
+                
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-6">
+                        <div class="flex flex-col md:flex-row md:items-center gap-6">
+                            <div class="flex-shrink-0">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/fa449be1-d827-42a3-a17e-b9c3720c862f.png" alt="Modern JavaScript course cover featuring abstract code patterns in blue and purple tones" class="h-full w-64 rounded-lg object-cover">
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-lg font-medium text-gray-900">Modern JavaScript Patterns</h3>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">In Progress</span>
+                                </div>
+                                <p class="mt-1 text-gray-600">Master modern JavaScript patterns like closures, modules, and functional programming.</p>
+                                
+                                <div class="mt-4">
+                                    <div class="flex justify-between text-sm text-gray-500 mb-1">
+                                        <span>Course progress</span>
+                                        <span>35%</span>
+                                    </div>
+                                    <div class="progress-bar-container">
+                                        <div class="progress-bar" style="width: 35%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-6">
+                                    <button class="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                        Continue Course
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-xl font-bold text-gray-900 mb-4">Recommended for you</h2>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Course Card 1 -->
+                    <div class="course-card bg-white overflow-hidden shadow rounded-lg transition duration-300">
+                        <div class="relative">
+                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/99a9f435-6583-4ec3-bf52-04411dbde9c2.png" alt="React fundamentals course cover with atom logo and vibrant gradient background" class="w-full h-48 object-cover">
+                            <div class="absolute top-2 right-2 bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full font-medium">
+                                Popular
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between items-start">
+                                <h3 class="text-lg font-medium text-gray-900 mb-1">React Fundamentals</h3>
+                                <span class="text-xs text-gray-500">12h</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-3">Learn the core concepts of React and build your first application</p>
+                            
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/252813ed-a5d9-4e5e-b182-5fba90fb359a.png" alt="Instructor portrait of Sarah Johnson with short brown hair and professional attire" class="h-6 w-6 rounded-full">
+                                    <span class="ml-2 text-sm text-gray-700">Sarah Johnson</span>
+                                </div>
+                                <div class="text-sm font-medium text-primary-600">$29.99</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Course Card 2 -->
+                    <div class="course-card bg-white overflow-hidden shadow rounded-lg transition duration-300">
+                        <div class="relative">
+                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/02e1df38-a834-4d47-b791-d0eae7d8c8b6.png" alt="Advanced CSS techniques course cover with colorful visual examples of CSS effects" class="w-full h-48 object-cover">
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between items-start">
+                                <h3 class="text-lg font-medium text-gray-900 mb-1">Advanced CSS Techniques</h3>
+                                <span class="text-xs text-gray-500">8h</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-3">Master advanced CSS techniques including Grid, Flexbox and animations</p>
+                            
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/d1750b8e-fb6e-4a45-b0f6-e0cece7cb217.png" alt="Instructor portrait of Michael Chen with glasses and a friendly smile" class="h-6 w-6 rounded-full">
+                                    <span class="ml-2 text-sm text-gray-700">Michael Chen</span>
+                                </div>
+                                <div class="text-sm font-medium text-primary-600">$24.99</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Course Card 3 -->
+                    <div class="course-card bg-white overflow-hidden shadow rounded-lg transition duration-300">
+                        <div class="relative">
+                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/2f52ec41-0b39-4c14-a9b0-43c3f653f465.png" alt="Node.js backend development course cover with server architecture diagram" class="w-full h-48 object-cover">
+                            <div class="absolute top-2 right-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
+                                New
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between items-start">
+                                <h3 class="text-lg font-medium text-gray-900 mb-1">Node.js Backend Development</h3>
+                                <span class="text-xs text-gray-500">15h</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-3">Build scalable backend services with Node.js, Express, and MongoDB</p>
+                            
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/a110a1a3-3019-4d79-bad5-b3574ea436b0.png" alt="Instructor portrait of David Wilson with beard and striped shirt" class="h-6 w-6 rounded-full">
+                                    <span class="ml-2 text-sm text-gray-700">David Wilson</span>
+                                </div>
+                                <div class="text-sm font-medium text-primary-600">$34.99</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Courses Page -->
+        <div id="courses-page" class="page">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900">My Courses</h1>
+                <p class="mt-2 text-gray-600">View and manage all your current and completed courses</p>
+            </div>
+
+            <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+                <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Current Courses</h3>
+                        <button class="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            Add Course
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-white overflow-hidden">
+                    <!-- Current Courses -->
+                    <div class="divide-y divide-gray-200">
+                        <!-- Course 1 -->
+                        <div class="p-6">
+                            <div class="flex flex-col md:flex-row gap-6">
+                                <div class="flex-shrink-0">
+                                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/435b66e1-c2d0-456d-88bf-df57555f74bf.png" alt="Modern JavaScript course cover showing sleek code editor with syntax highlighting" class="h-full w-64 rounded-lg object-cover">
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between">
+                                        <h4 class="text-lg font-medium text-gray-900">Modern JavaScript Patterns</h4>
+                                        <div class="flex items-center">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                In Progress
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <p class="mt-1 text-gray-600">Master modern JavaScript patterns like closures, modules, and functional programming.</p>
+                                    
+                                    <div class="mt-4">
+                                        <div class="flex justify-between text-sm text-gray-500 mb-1">
+                                            <span>Course progress</span>
+                                            <span>35%</span>
+                                        </div>
+                                        <div class="progress-bar-container">
+                                            <div class="progress-bar" style="width: 35%"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-4 flex flex-wrap gap-2">
+                                        <button class="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                            Continue
+                                        </button>
+                                        <button class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                            View Details
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Course 2 -->
+                        <div class="p-6">
+                            <div class="flex flex-col md:flex-row gap-6">
+                                <div class="flex-shrink-0">
+                                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/936d6881-cc9b-428a-845f-69a06ae6fe18.png" alt="React Native course cover showing mobile phone with app interface" class="h-full w-64 rounded-lg object-cover">
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between">
+                                        <h4 class="text-lg font-medium text-gray-900">React Native for Beginners</h4>
+                                        <div class="flex items-center">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                In Progress
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <p class="mt-1 text-gray-600">Learn to build cross-platform mobile apps with React Native and Expo.</p>
+                                    
+                                    <div class="mt-4">
+                                        <div class="flex justify-between text-sm text-gray-500 mb-1">
+                                            <span>Course progress</span>
+                                            <span>18%</span>
+                                        </div>
+                                        <div class="progress-bar-container">
+                                            <div class="progress-bar" style="width: 18%"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-4 flex flex-wrap gap-2">
+                                        <button class="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                            Continue
+                                        </button>
+                                        <button class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                            View Details
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completed Courses -->
+            <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Completed Courses</h3>
+                </div>
+                <div class="bg-white overflow-hidden">
+                    <div class="divide-y divide-gray-200">
+                        <!-- Course 1 -->
+                        <div class="p-6">
+                            <div class="flex flex-col md:flex-row gap-6">
+                                <div class="flex-shrink-0">
+                                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/04cd47f9-c5c5-4c02-8301-1c94b1df50b2.png" alt="HTML5 and CSS3 fundamentals course cover showing colorful web design elements" class="h-full w-64 rounded-lg object-cover">
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between">
+                                        <h4 class="text-lg font-medium text-gray-900">HTML5 & CSS3 Fundamentals</h4>
+                                        <div class="flex items-center">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                Completed
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <p class="mt-1 text-gray-600">Learn the core building blocks of modern web development with HTML5 and CSS3.</p>
+                                    
+                                    <div class="mt-4">
+                                        <div class="flex justify-between text-sm text-gray-500 mb-1">
+                                            <span>Completion date</span>
+                                            <span>May 15, 2023</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-4 flex flex-wrap gap-2">
+                                        <button class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                            View Certificate
+                                        </button>
+                                        <button class="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                            Retake Course
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Course 2 -->
+                        <div class="p-6">
+                            <div class="flex flex-col md:flex-row gap-6">
+                                <div class="flex-shrink-0">
+                                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/d7794569-1352-4fb5-9d6b-cd6668cee4fb.png" alt="JavaScript basics course cover showing simple code examples with bright background" class="h-full w-64 rounded-lg object-cover">
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between">
+                                        <h4 class="text-lg font-medium text-gray-900">JavaScript Basics</h4>
+                                        <div class="flex items-center">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                Completed
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <p class="mt-1 text-gray-600">Learn the fundamentals of JavaScript programming with hands-on exercises.</p>
+                                    
+                                    <div class="mt-4">
+                                        <div class="flex justify-between text-sm text-gray-500 mb-1">
+                                            <span>Completion date</span>
+                                            <span>March 22, 2023</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-4 flex flex-wrap gap-2">
+                                        <button class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                            View Certificate
+                                        </button>
+                                        <button class="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                            Retake Course
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Page -->
+        <div id="progress-page" class="page">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900">My Learning Progress</h1>
+                <p class="mt-2 text-gray-600">Track your progress across all courses and learning goals</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Overall Progress</h3>
+                        <div class="flex flex-col items-center">
+                            <div class="relative">
+                                <svg class="w-40 h-40" viewBox="0 0 36 36">
+                                    <path 
+                                        d="M18 2.0845
+                                            a 15.9155 15.9155 0 0 1 0 31.831
+                                            a 15.9155 15.9155 0 0 1 0 -31.831"
+                                        fill="none"
+                                        stroke="#e2e8f0"
+                                        stroke-width="3"
+                                    />
+                                    <path 
+                                        d="M18 2.0845
+                                            a 15.9155 15.9155 0 0 1 0 31.831
+                                            a 15.9155 15.9155 0 0 1 0 -31.831"
+                                        fill="none"
+                                        stroke="#4f46e5"
+                                        stroke-width="3"
+                                        stroke-dasharray="65,100"
+                                        stroke-linecap="round"
+                                    />
+                                    <text x="18" y="22" text-anchor="middle" font-size="6" font-weight="bold" fill="#4f46e5">65%</text>
+                                </svg>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-500">Average completion across all courses</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Learning Streak</h3>
+                        <div class="flex flex-col items-center">
+                            <div class="text-5xl font-bold text-primary-600 mb-2">12</div>
+                            <p class="text-sm text-gray-500">Days of continuous learning</p>
+                            <div class="mt-4 w-full">
+                                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                                    <span>S</span>
+                                    <span>M</span>
+                                    <span>T</span>
+                                    <span>W</span>
+                                    <span>T</span>
+                                    <span>F</span>
+                                    <span>S</span>
+                                </div>
+                                <div class="grid grid-cols-7 gap-1">
+                                    <div class="h-2 bg-gray-200 rounded"></div>
+                                    <div class="h-2 bg-gray-200 rounded"></div>
+                                    <div class="h-2 bg-primary-600 rounded"></div>
+                                    <div class="h-2 bg-primary-600 rounded"></div>
+                                    <div class="h-2 bg-primary-600 rounded"></div>
+                                    <div class="h-2 bg-primary-600 rounded"></div>
+                                    <div class="h-2 bg-primary-600 rounded"></div>
+                                    <div class="h-2 bg-primary-600 rounded"></div>
+                                    <div class="h-2 bg-primary-600 rounded"></div>
+                                    <div class="h-2 bg-primary-600 rounded"></div>
+                                    <div class="h-2 bg-primary-600 rounded"></div>
+                                    <div class="h-2 bg-primary-600 rounded"></div>
+                                    <div class="h-2 bg-primary-600 rounded"></div>
+                                    <div class="h-2 bg-primary-600 rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Latest Achievements</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/68857412-cccd-4d1d-8b0b-1e8ecbf9bb59.png" alt="Golden trophy icon with blue ribbon for course completion achievement" class="h-10 w-10 rounded-full">
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-gray-900">Course Completed!</p>
+                                    <p class="text-sm text-gray-500">You completed "JavaScript Basics" on March 22, 2023</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/b7060e0d-f983-4c25-9493-18bce2a13379.png" alt="Silver trophy icon with green ribbon for 10-day streak achievement" class="h-10 w-10 rounded-full">
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-gray-900">10-Day Streak!</p>
+                                    <p class="text-sm text-gray-500">You reached a 10-day learning streak on March 28, 2023</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/cc8704a6-7874-4cae-a0c2-6c356482bb0c.png" alt="Bronze trophy icon with orange ribbon for 5-hour progress achievement" class="h-10 w-10 rounded-full">
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-gray-900">5 Hours of Progress</p>
+                                    <p class="text-sm text-gray-500">You've spent 5 hours learning this week</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+                <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Course Progress Details</h3>
+                </div>
+                <div class="bg-white overflow-hidden">
+                    <div class="divide-y divide-gray-200">
+                        <!-- Course 1 -->
+                        <div class="p-6">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between">
+                                <div class="mb-4 md:mb-0">
+                                    <h4 class="text-lg font-medium text-gray-900">Modern JavaScript Patterns</h4>
+                                    <p class="text-sm text-gray-600">Started on January 15, 2023</p>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-sm font-medium text-gray-600 mr-2">35%</span>
+                                    <div class="w-32 h-2 bg-gray-200 rounded-full">
+                                        <div class="h-full rounded-full bg-primary-600" style="width: 35%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6">
+                                <h5 class="text-sm font-medium text-gray-900 mb-2">Completed Lessons</h5>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center">
+                                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/bd2b5456-784b-4c41-8fc0-ae32150ad3ee.png" alt="Green checkmark circle icon indicating completed lesson" class="h-5 w-5 text-green-500">
+                                            <span class="ml-2 text-sm font-medium text-gray-900">Introduction</span>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center">
+                                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/8c1871a5-77ce-415c-90db-8bca4081bc84.png" alt="Green checkmark circle icon indicating completed lesson" class="h-5 w-5 text-green-500">
+                                            <span class="ml-2 text-sm font-medium text-gray-900">Closures</span>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center">
+                                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/003576bf-b608-4b31-8d0c-e488a4565a50.png" alt="Green checkmark circle icon indicating completed lesson" class="h-5 w-5 text-green-500">
+                                            <span class="ml-2 text-sm font-medium text-gray-900">Prototypes</span>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center">
+                                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/b265d6fb-b150-4192-aff1-aa255478f107.png" alt="Gray circle icon indicating incomplete lesson" class="h-5 w-5 text-gray-300">
+                                            <span class="ml-2 text-sm font-medium text-gray-500">Promises</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6">
+                                <h5 class="text-sm font-medium text-gray-900 mb-2">Next Lesson: Promises</h5>
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0">
+                                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/44ac94f4-7bab-4df4-827e-9523a7834bd1.png" alt="Play button icon with purple gradient background" class="h-10 w-10 rounded-full">
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-gray-900">Understanding Promises and Async/Await</p>
+                                            <p class="text-sm text-gray-500 mt-1">Learn how to work with asynchronous JavaScript using Promises and the modern async/await syntax.</p>
+                                            <button class="mt-2 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                                Start Lesson
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Course 2 -->
+                        <div class="p-6">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between">
+                                <div class="mb-4 md:mb-0">
+                                    <h4 class="text-lg font-medium text-gray-900">React Native for Beginners</h4>
+                                    <p class="text-sm text-gray-600">Started on February 5, 2023</p>
+                                </div>
+                                <div class="flex items-center">
+                                    <span class="text-sm font-medium text-gray-600 mr-2">18%</span>
+                                    <div class="w-32 h-2 bg-gray-200 rounded-full">
+                                        <div class="h-full rounded-full bg-primary-600" style="width: 18%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6">
+                                <h5 class="text-sm font-medium text-gray-900 mb-2">Completed Lessons</h5>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center">
+                                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/f6d2c784-8e95-4d5b-89b3-3b4319001da1.png" alt="Green checkmark circle icon indicating completed lesson" class="h-5 w-5 text-green-500">
+                                            <span class="ml-2 text-sm font-medium text-gray-900">Getting Started</span>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center">
+                                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/48d23c7b-1519-4084-83af-c192d5b4c470.png" alt="Green checkmark circle icon indicating completed lesson" class="h-5 w-5 text-green-500">
+                                            <span class="ml-2 text-sm font-medium text-gray-900">Components</span>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center">
+                                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/09dc972b-ed6e-444d-864e-b7c227583a44.png" alt="Gray circle icon indicating incomplete lesson" class="h-5 w-5 text-gray-300">
+                                            <span class="ml-2 text-sm font-medium text-gray-500">State</span>
+                                        </div>
+                                    </div>
+                                    <div class="border border-gray-200 rounded-lg p-3">
+                                        <div class="flex items-center">
+                                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/f18ff231-2efe-4899-84d9-3d3a43383122.png" alt="Gray circle icon indicating incomplete lesson" class="h-5 w-5 text-gray-300">
+                                            <span class="ml-2 text-sm font-medium text-gray-500">Props</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6">
+                                <h5 class="text-sm font-medium text-gray-900 mb-2">Next Lesson: Components and State</h5>
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0">
+                                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/3f50aa94-806d-4810-9dd7-087b5f4ef907.png" alt="Play button icon with purple gradient background" class="h-10 w-10 rounded-full">
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-gray-900">Working with Components and State</p>
+                                            <p class="text-sm text-gray-500 mt-1">Learn how to manage component state and build interactive mobile interfaces.</p>
+                                            <button class="mt-2 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                                Start Lesson
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Course Detail Page (hidden by default, shown via JS when View Details is clicked) -->
+        <div id="course-detail-page" class="page">
+            <div>
+                <button id="back-button" class="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-500 mb-4">
+                    <svg class="-ml-1 mr-1 h-5 w-5 text-primary-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    Back to courses
+                </button>
+                
+                <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+                    <div class="px-4 py-5 sm:px-6 flex justify-between items-center border-b border-gray-200">
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900" id="course-title">Modern JavaScript Patterns</h1>
+                            <p class="mt-1 max-w-2xl text-sm text-gray-600">Master modern JavaScript patterns like closures, modules, and functional programming.</p>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">In Progress</span>
+                    </div>
+                    <div class="px-4 py-5 sm:p-6">
+                        <div class="flex flex-col lg:flex-row gap-8">
+                            <div class="lg:w-2/3">
+                                <div class="bg-gray-50 rounded-lg overflow-hidden mb-6">
+                                    <div class="video-container">
+                                        <iframe id="course-video" src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-8">
+                                    <h3 class="text-lg font-medium text-gray-900 mb-4">About This Course</h3>
+                                    <div class="prose prose-sm text-gray-500">
+                                        <p>This comprehensive course dives deep into modern JavaScript patterns that every professional developer should know. You'll learn practical techniques to write cleaner, more maintainable code that leverages JavaScript's powerful features.</p>
+                                        <p>The course starts with foundational concepts like closures and the module pattern, then progresses to more advanced topics including functional programming techniques, ES6+ features, and modern asynchronous patterns.</p>
+                                        <p>By the end of this course, you'll be able to: </p>
+                                        <ul>
+                                            <li>Apply modular patterns to structure large applications</li>
+                                            <li>Leverage closures for data privacy and state management</li>
+                                            <li>Implement functional programming techniques</li>
+                                            <li>Work effectively with promises and async/await</li>
+                                            <li>Understand and apply modern JavaScript patterns in real-world projects</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="lg:w-1/3">
+                                <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                                    <h3 class="text-lg font-medium text-gray-900 mb-4">Course Curriculum</h3>
+                                    
+                                    <div class="space-y-4">
+                                        <!-- Module 1 -->
+                                        <div>
+                                            <div class="flex items-center justify-between px-2 py-2 border-b border-gray-200">
+                                                <h4 class="text-sm font-medium text-gray-900">Module 1: Foundational Patterns</h4>
+                                                <span class="text-xs text-gray-500">2/5</span>
+                                            </div>
+                                            <div class="mt-2 space-y-1">
+                                                <div class="group flex items-center px-2 py-2 text-sm rounded-md hover:bg-gray-50">
+                                                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/ffb16577-80bd-4b3d-8744-d125c4c3f71b.png" alt="Play button icon in green indicating completed lesson" class="mr-3 h-5 w-5 text-green-500">
+                                                    <span class="font-medium text-gray-900">Introduction to Patterns</span>
+                                                </div>
+                                                <div class="group flex items-center px-2 py-2 text-sm rounded-md hover:bg-gray-50">
+                                                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0ef5a4ec-dd84-4b44-a1c4-e06134b5c406.png" alt="Play button icon in green indicating completed lesson" class="mr-3 h-5 w-5 text-green-500">
+                                                    <span class="font-medium text-gray-900">Closures in Depth</span>
+                                                </div>
+                                                <div class="group flex items-center px-2 py-2 text-sm rounded-md hover:bg-gray-50">
+                                                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/1fc89602-ab2b-43e7-86aa-4219370b8c16.png" alt="Play button icon in gray indicating upcoming lesson" class="mr-3 h-5 w-5 text-gray-400">
+                                                    <span class="text-gray-500">Prototypes and Inheritance</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Module 2 -->
+                                        <div>
+                                            <div class="flex items-center justify-between px-2 py-2 border-b border-gray-200">
+                                                <h4 class="text-sm font-medium text-gray-900">Module 2: Functional Programming</h4>
+                                                <span class="text-xs text-gray-500">0/4</span>
+                                            </div>
+                                            <div class="mt-2 space-y-1">
+                                                <div class="group flex items-center px-2 py-2 text-sm rounded-md hover:bg-gray-50">
+                                                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/82e99566-cb0a-46a2-a5e8-558788bc4207.png" alt="Play button icon in gray indicating upcoming lesson" class="mr-3 h-5 w-5 text-gray-400">
+                                                    <span class="text-gray-500">First-Class Functions</span>
+                                                </div>
+                                                <div class="group flex items-center px-2 py-2 text-sm rounded-md hover:bg-gray-50">
+                                                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/f889054a-19ef-476e-a8a1-12fdf9c811ac.png" alt="Play button icon in gray indicating upcoming lesson" class="mr-3 h-5 w-5 text-gray-400">
+                                                    <span class="text-gray-500">Higher-Order Functions</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-6">
+                                        <div class="flex justify-between text-sm text-gray-500 mb-1">
+                                            <span>Course progress</span>
+                                            <span>35%</span>
+                                        </div>
+                                        <div class="progress-bar-container">
+                                            <div class="progress-bar" style="width: 35%"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <button class="mt-6 w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                        Continue Learning
+                                    </button>
+                                </div>
+                                
+                                <div class="mt-6 bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                                    <h3 class="text-lg font-medium text-gray-900 mb-4">Instructor</h3>
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0">
+                                            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/e84ac330-86a8-4ea3-ab06-bb745b91c14b.png" alt="Instructor portrait of Alex Johnson with professional attire and friendly expression" class="h-12 w-12 rounded-full">
+                                        </div>
+                                        <div class="ml-3">
+                                            <h4 class="text-sm font-medium text-gray-900">Alex Johnson</h4>
+                                            <p class="text-sm text-gray-500">Senior JavaScript Developer</p>
+                                            <p class="mt-2 text-sm text-gray-500">10 years of experience building JavaScript applications at scale. Previously worked at major tech companies including TechCorp and WebSolutions Inc.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/5d224cef-6205-40ee-86ba-2412587e45f5.png" alt="LearnHub logo in navy blue with 'Learning For Everyone' slogan below" class="h-8">
+                    <p class="mt-4 text-sm text-gray-500">LearnHub provides high-quality courses on in-demand technologies and skills.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Company</h3>
+                        <div class="mt-4 space-y-2">
+                            <a href="#" class="text-sm text-gray-600 hover:text-gray-900 block">About</a>
+                            <a href="#" class="text-sm text-gray-600 hover:text-gray-900 block">Careers</a>
+                            <a href="#" class="text-sm text-gray-600 hover:text-gray-900 block">Contact</a>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Resources</h3>
+                        <div class="mt-4 space-y-2">
+                            <a href="#" class="text-sm text-gray-600 hover:text-gray-900 block">Documentation</a>
+                            <a href="#" class="text-sm text-gray-600 hover:text-gray-900 block">Community</a>
+                            <a href="#" class="text-sm text-gray-600 hover:text-gray-900 block">Support</a>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Subscribe to our newsletter</h3>
+                    <div class="mt-4">
+                        <form class="flex">
+                            <input type="email" class="flex-1 min-w-0 block w-
